@@ -88,6 +88,7 @@ pub fn setup(
         .spawn(SpriteSheetBundle {
             sprite,
             texture_atlas: atlas_handle,
+            transform: Transform::from_translation(Vec3::new(0.0, 10.0, 1.0)),
             ..SpriteSheetBundle::default()
         })
         .insert(Direction::Right)
@@ -114,21 +115,6 @@ pub fn setup(
         .with_children(|children| {
             children.spawn(crate::new_camera_2d());
         });
-
-    /*
-    commands.spawn(SpriteSheetBundle {
-        sprite: TextureAtlasSprite::new(SPRITE_IDX_GREEN_STAND),
-        texture_atlas: atlas_handle,
-        transform: Transform {
-            translation: Vec3::new(100.0 /* x */, 10.0 /* y */, 0.0 /* z */),
-            ..Transform::default()
-        },
-        ..SpriteSheetBundle::default()
-    })
-        .insert(RigidBody::KinematicPositionBased)
-        .insert(Collider::ball(0.5))
-        .insert(KinematicCharacterController);
-    */
 }
 pub fn player_jumps(
     keyboard_input: Res<Input<KeyCode>>,
@@ -153,15 +139,6 @@ fn jump_reset(
     }
 }
 
-fn check_reset_game(mut query: Query<(&Player, &mut Velocity, &mut Transform)>) {
-    for (_, mut velocity, mut transform) in query.iter_mut() {
-        if transform.translation.y < -200.0 {
-            transform.translation = Vec3::new(0.0, -20.0, 1.0);
-            velocity.linvel.x = 0.0;
-            velocity.linvel.y = 0.0;
-        }
-    }
-}
 fn set_jumping_false_if_touching_floor(
     entity: &Entity,
     jumper: &mut Jumper,
@@ -170,6 +147,16 @@ fn set_jumping_false_if_touching_floor(
     if let CollisionEvent::Started(e1, e2, _) = collision_event {
         if entity == e1 || entity == e2 {
             jumper.is_jumping = false;
+        }
+    }
+}
+
+fn check_reset_game(mut query: Query<(&Player, &mut Velocity, &mut Transform)>) {
+    for (_, mut velocity, mut transform) in query.iter_mut() {
+        if transform.translation.y < -200.0 {
+            transform.translation = Vec3::new(0.0, 10.0, 1.0);
+            velocity.linvel.x = 0.0;
+            velocity.linvel.y = 0.0;
         }
     }
 }
