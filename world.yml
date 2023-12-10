@@ -1,0 +1,223 @@
+levels:
+  - id: level-0.platformer.jcdyer.dev
+    name: Simple
+    features:
+      - kind: exit
+        data: 
+          - location: [24.0, -2.0]
+      - kind: floor
+        data: 
+          - loc: [-3, -3]
+            length: 30.5
+              
+  - id: level-n-elevator.platformer.jcdyer.dev
+    name: Going up?
+    features:
+      - kind: exit
+        data: 
+          - location: [50, 51]
+      - kind: floor
+        data:
+          - loc: [-3, -3]
+            length: 30
+          - loc: [28, 50]
+            length: 25
+      - kind: elevator
+        data:
+          - path:
+            - [27, -3]
+            - [27, 25]
+            control:
+              kind: switches
+              locations: 
+                - [22, -2]
+                - [32, 51]
+      
+  - id: level-1.platformer.jcdyer.dev
+    name: Learn to Jump
+    features:
+      - kind: exit
+        data: 
+          - location: [130.0, -2.0]
+      - kind: floor
+        data:
+          - loc: [-3, -3]
+            length: 100.
+          - loc: [25, -2]
+            length: 10.
+          - loc: [25, -1]
+            length: 10.
+          - loc: [25, 0]
+            length: 10.
+          - loc: [25, 1]
+            length: 10.
+          - loc: [25, 2]
+            length: 10.
+          - loc: [25, 3]
+            length: 10.
+          - loc: [60, -2]
+            length: 16.
+          - loc: [61, -1]
+            length: 14.
+          - loc: [62, 0]
+            length: 12.
+          - loc: [63, 1]
+            length: 10.
+          - loc: [64, 2]
+            length: 8.
+          - loc: [65, 3]
+            length: 6.
+          - loc: [105, -3]
+            length: 30
+          - loc: [120, -2]
+            length: 1 
+          - loc: [120, -1]
+            length: 1 
+          - loc: [120, 0]
+            length: 1 
+          - loc: [120, 1]
+            length: 1 
+          - loc: [120, 2]
+            length: 1 
+          - loc: [120, 3]
+            length: 1 
+          - loc: [120, 4]
+            length: 1 
+
+  - id: level-2.platformer.jcdyer.dev
+    name: Level 2
+    features:
+      - kind: exit
+        data: 
+          - location: [164.0, -74.0]
+      - kind: floor
+        data:
+          - loc: [-3, 0]
+            length: 21
+          - loc: [21.0, 7.]
+            length: 3.0
+          - loc: [28.0, 7.]
+            length: 3.0
+          - loc: [35.0, 7.]
+            length: 3.0
+          - loc: [42.0, 7.]
+            length: 3.0
+          - loc: [49.0, 7.]
+            length: 3.0
+          - loc: [54.0, 13.0]
+            length: 21.0
+          - loc: [74.0, 14.0]
+            length: 1.0
+            left: 76
+          - loc: [74.0, 15.0]
+            length: 1.0
+            left: 76
+          - loc: [74.0, 16.0]
+            length: 1.0
+            left: 76
+          - loc: [74.0, 17.0]
+            length: 1.0
+            left: 76
+          - loc: [74.0, 18.0]
+            length: 127.0
+            left: 82
+          - loc: [220.0, 1.0]
+            length: 50.0
+          - loc: [160.0, -75.0]
+            length: 30.0
+            left: 84
+            right: 77
+            middle: 7
+
+  - id: level-3.platformer.jcdyer.dev
+    name: Up
+    features:
+      - kind: exit
+        data: 
+          - location: [0.0, 101.0]
+      - kind: floor
+        data:
+          - loc: [-20, 0]
+            length: 40.
+          - loc: [10, 8]
+            length: 10.
+          - loc: [0, 16]
+            length: 10.
+          - loc: [-8, 20]
+            length: 10.
+          - loc: [-20, 24]
+            length: 10.
+          - loc: [-20, 32]
+            length: 4.
+          - loc: [-5, 30]
+            length: 10.
+          - loc: [-10, 38]
+            length: 18.
+          - loc: [10, 45]
+            length: 10
+          - loc: [-10, 50]
+            length: 20.
+          - loc: [12,56]
+            length: 4.
+          - loc: [4,62]
+            length: 4.
+          - loc: [-4,62]
+            length: 4.
+          - loc: [-8,68]
+            length: 4.
+          - loc: [-22,75]
+            length: 12.
+          - loc: [-4, 82]
+            length: 6.
+          - loc: [6, 88]
+            length: 4.
+          - loc: [16, 96]
+            length: 2.
+          - loc: [4, 104]
+            length: 6.
+          - loc: [4, 103]
+            length: 1.
+          - loc: [4, 102]
+            length: 1.
+          - loc: [4, 101]
+            length: 1.
+          - loc: [-4, 100]
+            length: 9.
+          - loc: [-4, 101]
+            length: 1.
+          - loc: [-4, 102]
+            length: 1.
+          - loc: [-4, 103]
+            length: 1.
+          - loc: [-4, 104]
+            length: 1.
+
+  - id: end.platformer.jcdyer.dev
+    name: End
+    features:
+      - kind: exit
+        data: 
+          - location: [ 0.0, 12.0 ]
+      - kind: floor
+        data:
+          - loc: [-3, 6]
+            length: 8
+          - loc: [-3, 11.0]
+            length: 8
+          - loc: [-3, 7.0]
+            length: 1
+          - loc: [-3, 8.0]
+            length: 1
+          - loc: [-3, 9.0]
+            length: 1
+          - loc: [-3, 10.0]
+            length: 1
+          - loc: [4, 7.0]
+            length: 1
+          - loc: [4, 8.0]
+            length: 1
+          - loc: [4, 9.0]
+            length: 1
+          - loc: [4, 10.0]
+            length: 1
+

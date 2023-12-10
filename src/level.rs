@@ -24,8 +24,8 @@ pub struct Ready;
 fn setup_level(mut commands: Commands) {
     commands
         .spawn(SpatialBundle::default())
-        .insert(Level { idx: 0 }) ;
-        //.insert(Shader::from_glsl("shaders/bg.glsl", ShaderStage::Fragment, ));
+        .insert(Level { idx: 0 });
+    //.insert(Shader::from_glsl("shaders/bg.glsl", ShaderStage::Fragment, ));
 }
 
 #[derive(serde::Deserialize)]
@@ -44,7 +44,25 @@ struct LevelDefinition {
 #[serde(rename_all = "snake_case", tag = "kind", content = "data")]
 enum Feature {
     Floor(Vec<FloorDefinition>),
-    Exit(Vec2),
+    Exit(Vec<ExitDefinition>),
+    Elevator(Vec<ElevatorDefinition>),
+}
+
+#[derive(serde::Deserialize)]
+struct ExitDefinition {
+    location: Vec2,
+}
+#[derive(serde::Deserialize, Debug)]
+struct ElevatorDefinition {
+    path: tg::Line,
+    control: ElevatorControl,
+}
+
+#[derive(serde::Deserialize, Debug)]
+#[serde(rename_all = "snake_case", tag = "kind")]
+enum ElevatorControl {
+    Constant,
+    Switches { locations: (Vec2, Vec2) },
 }
 
 #[derive(serde::Deserialize)]
@@ -130,79 +148,144 @@ fn spawn_level_features(
 
     for feature in &level_definition.features {
         match feature {
-            Feature::Exit(exit) => {
-                spawn_level_exit(
-                    commands,
-                    &tile_atlas,
-                    level_entity,
-                    level.idx,
-                    exit,
-                )
+            Feature::Exit(exits) => {
+                spawn_exits(commands, &tile_atlas, level_entity, level.idx, exits)
             }
             Feature::Floor(floors) => {
                 spawn_floors(commands, floors, level_entity, &ground_atlas).unwrap()
+            }
+            Feature::Elevator(elevators) => {
+                spawn_elevators(commands, &ground_atlas, level_entity, elevators)
             }
         }
     }
 }
 
-fn spawn_level_exit(
+fn spawn_elevators(
+    commands: &mut Commands,
+    ground_atlas: &Handle<TextureAtlas>,
+    level_entity: Entity,
+    elevators: &[ElevatorDefinition],
+) {
+    const ELEVATOR_LEFT_SPRITE_INDEX: usize = 13; // 1 * 7 + 6;
+    const ELEVATOR_RIGHT_SPRITE_INDEX: usize = 110; // 15 * 7 + 5;
+    const ELEVATOR_WIDTH: f32 = 2.0;
+
+    let mut left_sprite = TextureAtlasSprite::new(ELEVATOR_LEFT_SPRITE_INDEX);
+    left_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
+    let mut right_sprite = TextureAtlasSprite::new(ELEVATOR_RIGHT_SPRITE_INDEX);
+    right_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
+
+
+    for elevator in elevators {
+
+        let mut location = {
+            let tg::Point { x, y } = elevator.path.points()[0];
+            Vec2 { x: x as f32, y : y as f32 }
+        }.extend(1.0);
+
+        // collider is half the width of the elevator. May want to tweak the height.
+        let collider = Collider::cuboid(ELEVATOR_WIDTH / 2.0, 0.5);
+
+        let left = Vec3 { x: location.x + 0.5, ..location };
+        let right = Vec3 { x: left.x + 1.0, ..left };
+
+
+        commands.entity(level_entity).with_children(|children| {
+            children.spawn(SpriteSheetBundle {
+                sprite: left_sprite.clone(),
+                texture_atlas: ground_atlas.clone(),
+                transform: Transform::from_translation(left),
+                ..SpriteSheetBundle::default()
+            });
+            children.spawn(SpriteSheetBundle {
+                sprite: right_sprite.clone(),
+                texture_atlas: ground_atlas.clone(),
+                transform: Transform::from_translation(right),
+                ..SpriteSheetBundle::default()
+            });
+            children
+                .spawn(SpriteBundle {
+                    sprite: Sprite {
+                        color: Color::rgba(1.0, 0.0, 0.0, 0.0),
+                        custom_size: Some(Vec2::new(ELEVATOR_WIDTH, 1.0)),
+                        ..Sprite::default()
+                    },
+                    transform: Transform::from_translation(Vec3::new(
+                        location.x + ELEVATOR_WIDTH / 2.0, // Add half the elevator
+                        location.y,
+                        1.0,
+                    )),
+                    ..SpriteBundle::default()
+                })
+                .insert(RigidBody::Fixed)
+                .insert(collider);
+        });
+
+    }
+}
+
+fn spawn_exits(
     commands: &mut Commands,
     tile_atlas: &Handle<TextureAtlas>,
     level_entity: Entity,
     level_index: u8,
-    exit: &Vec2,
+    exits: &[ExitDefinition],
 ) {
-
     const DOOR_BOTTOM_SPRITE_INDEX: usize = 48;
     const DOOR_TOP_SPRITE_INDEX: usize = 43;
     const EXIT_SIGN_SPRITE_INDEX: usize = 39;
 
-    let door_bottom_location = exit;
-    let door_bottom_translation = door_bottom_location.extend(1.0);
     let mut door_bottom_sprite = TextureAtlasSprite::new(DOOR_BOTTOM_SPRITE_INDEX);
     door_bottom_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
 
     let mut door_top_sprite = TextureAtlasSprite::new(DOOR_TOP_SPRITE_INDEX);
     door_top_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
-    let door_top_translation = Vec3::new(
-        door_bottom_translation.x,
-        door_bottom_translation.y + 1.0,
-        door_bottom_translation.z,
-    );
 
     let mut exit_sign_sprite = TextureAtlasSprite::new(EXIT_SIGN_SPRITE_INDEX);
     exit_sign_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
-    let exit_sign_translation = Vec3::new(
-        door_bottom_translation.x + 2.0,
-        door_bottom_translation.y,
-        2.0,
-    );
 
-    commands.entity(level_entity).with_children(|children| {
-        children
-            .spawn(SpriteSheetBundle {
-                sprite: door_bottom_sprite.clone(),
+    for exit in exits {
+        let door_bottom_location = exit.location;
+        let door_bottom_translation = door_bottom_location.extend(1.0);
+
+        let door_top_translation = Vec3::new(
+            door_bottom_translation.x,
+            door_bottom_translation.y + 1.0,
+            door_bottom_translation.z,
+        );
+
+        let exit_sign_translation = Vec3::new(
+            door_bottom_translation.x + 2.0,
+            door_bottom_translation.y,
+            2.0,
+        );
+
+        commands.entity(level_entity).with_children(|children| {
+            children
+                .spawn(SpriteSheetBundle {
+                    sprite: door_bottom_sprite.clone(),
+                    texture_atlas: tile_atlas.clone(),
+                    transform: Transform::from_translation(door_bottom_translation),
+                    ..SpriteSheetBundle::default()
+                })
+                .insert(Exit {
+                    destination: level_index + 1,
+                });
+            children.spawn(SpriteSheetBundle {
+                sprite: door_top_sprite.clone(),
                 texture_atlas: tile_atlas.clone(),
-                transform: Transform::from_translation(door_bottom_translation),
+                transform: Transform::from_translation(door_top_translation),
                 ..SpriteSheetBundle::default()
-            })
-            .insert(Exit {
-                destination: level_index + 1,
             });
-        children.spawn(SpriteSheetBundle {
-            sprite: door_top_sprite.clone(),
-            texture_atlas: tile_atlas.clone(),
-            transform: Transform::from_translation(door_top_translation),
-            ..SpriteSheetBundle::default()
+            children.spawn(SpriteSheetBundle {
+                sprite: exit_sign_sprite.clone(),
+                texture_atlas: tile_atlas.clone(),
+                transform: Transform::from_translation(exit_sign_translation),
+                ..SpriteSheetBundle::default()
+            });
         });
-        children.spawn(SpriteSheetBundle {
-            sprite: exit_sign_sprite.clone(),
-            texture_atlas: tile_atlas.clone(),
-            transform: Transform::from_translation(exit_sign_translation),
-            ..SpriteSheetBundle::default()
-        });
-    });
+    }
 }
 
 fn exit_level(
@@ -235,7 +318,6 @@ fn exit_level(
         }
     }
 }
-
 
 fn spawn_floors(
     commands: &mut Commands,
@@ -307,4 +389,16 @@ fn spawn_floor_onto(
             .insert(RigidBody::Fixed)
             .insert(collider);
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{io::BufReader, fs::File};
+    use super::WorldDefinition;
+
+    #[test]
+    fn deserialize_world() {
+        let mut file = BufReader::new(File::open("world.yml").unwrap());
+        let _world_definition: WorldDefinition = serde_yaml::from_reader(&mut file).unwrap();
+    }
 }

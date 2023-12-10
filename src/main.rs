@@ -1,13 +1,13 @@
-
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
     prelude::*,
     render::camera::ScalingMode,
     window::{PrimaryWindow, WindowResolution},
 };
-use bevy_rapier2d::prelude::{ NoUserData, RapierPhysicsPlugin, };
+use bevy_rapier2d::prelude::{NoUserData, RapierPhysicsPlugin};
 
 mod animation;
+mod elevator;
 mod level;
 mod player;
 
@@ -27,18 +27,15 @@ fn main() {
             RapierPhysicsPlugin::<NoUserData>::default(),
             player::PlayerPlugin,
             animation::AnimationPlugin,
-            level::LevelPlugin
+            level::LevelPlugin,
         ))
         .add_systems(Update, bevy::window::close_on_esc)
         .run();
 }
 
-
-
 fn configure_window(mut query: Query<&mut Window, With<PrimaryWindow>>) {
     if let Ok(mut window) = query.get_single_mut() {
         window.title = "Platformer!".into();
-        
     }
 }
 
@@ -57,3 +54,5 @@ fn new_camera_2d() -> Camera2dBundle {
     println!("{:?}", cam2d.transform);
     cam2d
 }
+
+

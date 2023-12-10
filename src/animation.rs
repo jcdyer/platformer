@@ -1,8 +1,9 @@
 use std::time::Duration;
 
 use bevy::{
-    prelude::{Component, Plugin, Query, Update, Res},
-    time::{Timer, TimerMode, Time}, sprite::TextureAtlasSprite,
+    prelude::{Component, Plugin, Query, Res, Update},
+    sprite::TextureAtlasSprite,
+    time::{Time, Timer, TimerMode},
 };
 
 #[derive(Component)]

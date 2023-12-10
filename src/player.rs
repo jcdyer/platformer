@@ -116,14 +116,25 @@ pub fn setup(
             children.spawn(crate::new_camera_2d());
         });
 }
+
 pub fn player_jumps(
     keyboard_input: Res<Input<KeyCode>>,
     mut players: Query<(&mut Jumper, &mut Velocity), With<Player>>,
 ) {
     for (mut jumper, mut velocity) in players.iter_mut() {
-        if keyboard_input.pressed(KeyCode::Space) && !jumper.is_jumping {
-            velocity.linvel = Vec2::new(velocity.linvel.x, jumper.jump_impulse);
+        if keyboard_input.just_pressed(KeyCode::Space) && !jumper.is_jumping {
+            eprintln!("player jumps: {}", velocity.linvel.y);
+            velocity.linvel.y = jumper.jump_impulse;
             jumper.is_jumping = true;
+        }
+        if keyboard_input.just_released(KeyCode::Space)
+            && jumper.is_jumping
+            && velocity.linvel.y > 0.
+        {
+            eprintln!("player release: {}", velocity.linvel.y);
+            velocity.linvel.y = velocity.linvel.y.min(jumper.jump_impulse * 0.4);
+            eprintln!("new velocity: {}", velocity.linvel.y);
+            // If the input was released, slow the jump
         }
     }
 }
@@ -178,7 +189,6 @@ fn player_movement(
     }
 }
 
-
 fn apply_movement_animation(
     mut commands: Commands,
     query: Query<(Entity, &Player, &Velocity), Without<Animation>>,
@@ -203,11 +213,7 @@ fn apply_movement_animation(
 
 fn apply_idle_sprite(
     mut commands: Commands,
-    mut query: Query<(
-        Entity,
-        &Velocity,
-        &mut TextureAtlasSprite,
-    )>,
+    mut query: Query<(Entity, &Velocity, &mut TextureAtlasSprite)>,
 ) {
     if query.is_empty() {
         return;
@@ -225,10 +231,7 @@ enum Direction {
     Right,
 }
 
-fn update_direction(
-    mut commands: Commands,
-    query: Query<(Entity, &Velocity)>,
-) {
+fn update_direction(mut commands: Commands, query: Query<(Entity, &Velocity)>) {
     if query.is_empty() {
         return;
     }
