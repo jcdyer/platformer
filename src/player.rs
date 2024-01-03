@@ -98,7 +98,7 @@ pub fn setup(
         })
         .insert(RigidBody::Dynamic)
         .insert(Damping {
-            linear_damping: 0.5,
+            linear_damping: 0.75,
             angular_damping: 1.0,
         })
         .insert(LockedAxes::ROTATION_LOCKED)
@@ -213,7 +213,7 @@ fn apply_movement_animation(
 
 fn apply_idle_sprite(
     mut commands: Commands,
-    mut query: Query<(Entity, &Velocity, &mut TextureAtlasSprite)>,
+    mut query: Query<(Entity, &Velocity, &mut TextureAtlasSprite), With<Player>>,
 ) {
     if query.is_empty() {
         return;
@@ -231,7 +231,7 @@ enum Direction {
     Right,
 }
 
-fn update_direction(mut commands: Commands, query: Query<(Entity, &Velocity)>) {
+fn update_direction(mut commands: Commands, query: Query<(Entity, &Velocity), With<Player>>) {
     if query.is_empty() {
         return;
     }

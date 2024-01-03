@@ -28,6 +28,7 @@ fn main() {
             player::PlayerPlugin,
             animation::AnimationPlugin,
             level::LevelPlugin,
+            elevator::ElevatorPlugin,
         ))
         .add_systems(Update, bevy::window::close_on_esc)
         .run();
@@ -54,5 +55,3 @@ fn new_camera_2d() -> Camera2dBundle {
     println!("{:?}", cam2d.transform);
     cam2d
 }
-
-

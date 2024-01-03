@@ -10,29 +10,93 @@ levels:
           - loc: [-3, -3]
             length: 30.5
               
-  - id: level-n-elevator.platformer.jcdyer.dev
+  - id: level-1-elevator.platformer.jcdyer.dev
     name: Going up?
     features:
       - kind: exit
         data: 
-          - location: [50, 51]
+          - location: [50, 26]
       - kind: floor
         data:
           - loc: [-3, -3]
             length: 30
-          - loc: [28, 50]
+          - loc: [29, 25]
             length: 25
       - kind: elevator
         data:
-          - path:
-            - [27, -3]
-            - [27, 25]
+          - start_location: [27, -3]
+            end_y: 25
             control:
-              kind: switches
-              locations: 
-                - [22, -2]
-                - [32, 51]
+              kind: constant
+              #kind: switches
+              #locations: 
+              #  - [22, -2]
+              #  - [32, 51]
       
+  - id: level-2-elevator.platformer.jcdyer.dev
+    name: Changing platforms
+    features:
+      - kind: exit
+        data: 
+          - location: [50, 48]
+      - kind: floor
+        data:
+          - loc: [-3, -3]
+            length: 30
+          - loc: [31, 47]
+            length: 25
+          - loc: [31, 21]
+            length: 1
+          - loc: [31, 22]
+            length: 1
+          - loc: [31, 23]
+            length: 1
+          - loc: [31, 24]
+            length: 1
+          - loc: [31, 25]
+            length: 1
+      - kind: elevator
+        data:
+          - start_location: [27, -3]
+            end_y: 23
+            control:
+              kind: constant
+          - start_location: [29, 47] 
+            end_y: 21
+            control:
+              kind: constant
+
+  - id: level-3-elevator.platformer.jcdyer.dev
+    name: Hippity hop
+    features:
+      - kind: exit
+        data: 
+          - location: [66, 51]
+      - kind: floor
+        data:
+          - loc: [-3, -3]
+            length: 30
+          - loc: [60, 50]
+            length: 12
+      - kind: elevator
+        data:
+          - start_location: [30, -10]
+            end_y: 12
+            control:
+              kind: constant
+          - start_location: [36, 25] 
+            end_y: 5
+            control:
+              kind: constant
+          - start_location: [43, 20] 
+            end_y: 40
+            control:
+              kind: constant
+          - start_location: [48, 50] 
+            end_y: 40
+            control:
+              kind: constant
+
   - id: level-1.platformer.jcdyer.dev
     name: Learn to Jump
     features:

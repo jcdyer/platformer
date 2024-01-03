@@ -53,14 +53,16 @@ struct ExitDefinition {
     location: Vec2,
 }
 #[derive(serde::Deserialize, Debug)]
-struct ElevatorDefinition {
-    path: tg::Line,
-    control: ElevatorControl,
+pub struct ElevatorDefinition {
+    pub start_location: Vec2,
+    pub end_y: f32,
+    //pub path: tg::Line,
+    pub control: ElevatorControl,
 }
 
 #[derive(serde::Deserialize, Debug)]
 #[serde(rename_all = "snake_case", tag = "kind")]
-enum ElevatorControl {
+pub enum ElevatorControl {
     Constant,
     Switches { locations: (Vec2, Vec2) },
 }
@@ -167,61 +169,8 @@ fn spawn_elevators(
     level_entity: Entity,
     elevators: &[ElevatorDefinition],
 ) {
-    const ELEVATOR_LEFT_SPRITE_INDEX: usize = 13; // 1 * 7 + 6;
-    const ELEVATOR_RIGHT_SPRITE_INDEX: usize = 110; // 15 * 7 + 5;
-    const ELEVATOR_WIDTH: f32 = 2.0;
-
-    let mut left_sprite = TextureAtlasSprite::new(ELEVATOR_LEFT_SPRITE_INDEX);
-    left_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
-    let mut right_sprite = TextureAtlasSprite::new(ELEVATOR_RIGHT_SPRITE_INDEX);
-    right_sprite.custom_size = Some(Vec2::new(1.0, 1.0));
-
-
     for elevator in elevators {
-
-        let mut location = {
-            let tg::Point { x, y } = elevator.path.points()[0];
-            Vec2 { x: x as f32, y : y as f32 }
-        }.extend(1.0);
-
-        // collider is half the width of the elevator. May want to tweak the height.
-        let collider = Collider::cuboid(ELEVATOR_WIDTH / 2.0, 0.5);
-
-        let left = Vec3 { x: location.x + 0.5, ..location };
-        let right = Vec3 { x: left.x + 1.0, ..left };
-
-
-        commands.entity(level_entity).with_children(|children| {
-            children.spawn(SpriteSheetBundle {
-                sprite: left_sprite.clone(),
-                texture_atlas: ground_atlas.clone(),
-                transform: Transform::from_translation(left),
-                ..SpriteSheetBundle::default()
-            });
-            children.spawn(SpriteSheetBundle {
-                sprite: right_sprite.clone(),
-                texture_atlas: ground_atlas.clone(),
-                transform: Transform::from_translation(right),
-                ..SpriteSheetBundle::default()
-            });
-            children
-                .spawn(SpriteBundle {
-                    sprite: Sprite {
-                        color: Color::rgba(1.0, 0.0, 0.0, 0.0),
-                        custom_size: Some(Vec2::new(ELEVATOR_WIDTH, 1.0)),
-                        ..Sprite::default()
-                    },
-                    transform: Transform::from_translation(Vec3::new(
-                        location.x + ELEVATOR_WIDTH / 2.0, // Add half the elevator
-                        location.y,
-                        1.0,
-                    )),
-                    ..SpriteBundle::default()
-                })
-                .insert(RigidBody::Fixed)
-                .insert(collider);
-        });
-
+        super::elevator::setup(commands, ground_atlas, level_entity, elevator);
     }
 }
 
@@ -393,8 +342,8 @@ fn spawn_floor_onto(
 
 #[cfg(test)]
 mod tests {
-    use std::{io::BufReader, fs::File};
     use super::WorldDefinition;
+    use std::{fs::File, io::BufReader};
 
     #[test]
     fn deserialize_world() {
